@@ -1,10 +1,15 @@
 import asyncio
 import requests
+import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters import Command
 from aiogram.enums import ChatType
 from config import Config, load_config
+
+# Настройка логирования
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 config: Config = load_config()
 BOT_TOKEN: str = config.tg_bot.token
@@ -53,7 +58,7 @@ start_keyboard = ReplyKeyboardMarkup(
 
 @dp.message(Command("start"))
 async def start(message: types.Message):
-	logger.debug("Команда /start получена")
+    logger.debug("Команда /start получена")
     await message.answer("Привет! Я помогу вам с заказом. Выберите действие:", reply_markup=start_keyboard)
 
 @dp.message(lambda message: message.text == "Заполнить анкету")
@@ -76,7 +81,7 @@ async def collect_answers_or_faq(message: types.Message):
     text = message.text.lower()
     
     if message.chat.type in [ChatType.GROUP, ChatType.SUPERGROUP]:
-        print(f"📩 Сообщение в группе ({message.chat.title}): {message.text}")
+        logger.debug(f"Сообщение в группе ({message.chat.title}): {message.text}")
         for keyword, response in faq.items():
             if any(word in text for word in keyword.lower().split()):
                 await message.reply(response)
